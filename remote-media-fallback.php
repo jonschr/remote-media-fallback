@@ -3,7 +3,7 @@
  * Plugin Name: Remote Media Fallback
  * Plugin URI: https://github.com/jonschr/remote-media-fallback
  * Description: Serves missing local uploads from a configured production WordPress site.
- * Version: 0.1.2
+ * Version: 0.1.3
  * Requires PHP: 7.4
  * Author: Jon Schroeder
  * Update URI: https://github.com/jonschr/remote-media-fallback
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class Remote_Media_Fallback {
 
-	const VERSION = '0.1.2';
+	const VERSION = '0.1.3';
 	const URL_CONSTANT = 'REMOTE_MEDIA_FALLBACK_URL';
 
 	/**
@@ -94,6 +94,7 @@ final class Remote_Media_Fallback {
 		header( 'Content-Type: ' . $content_type );
 		header( 'X-Content-Type-Options: nosniff' );
 		header( 'X-Remote-Media-Fallback: ' . sanitize_text_field( wp_parse_url( $production_url, PHP_URL_HOST ) ) );
+		header( 'Server-Timing: remote-media-fallback;desc="remote"', false );
 
 		self::relay_header( $response, 'accept-ranges', 'Accept-Ranges' );
 		self::relay_header( $response, 'content-range', 'Content-Range' );
@@ -114,6 +115,37 @@ final class Remote_Media_Fallback {
 		}
 
 		exit;
+	}
+
+	/**
+	 * Log which upload images were served locally or by the fallback.
+	 */
+	public static function print_console_reporter() {
+		if ( ! defined( self::URL_CONSTANT ) || ! self::is_valid_production_url( constant( self::URL_CONSTANT ) ) ) {
+			return;
+		}
+
+		$uploads_path = trailingslashit( wp_parse_url( wp_upload_dir()['baseurl'], PHP_URL_PATH ) );
+		?>
+		<script>
+		window.remoteMediaFallbackReport = function () {
+			const uploadsPath = <?php echo wp_json_encode( $uploads_path ); ?>;
+			const images = new Map();
+			performance.getEntriesByType('resource').forEach(function (entry) {
+				const url = new URL(entry.name);
+				if (url.origin !== location.origin || !url.pathname.startsWith(uploadsPath) || !/\.(?:avif|bmp|gif|heic|heif|ico|jpe?g|png|svg|webp)$/i.test(url.pathname)) return;
+				const remote = Array.from(entry.serverTiming || []).some(function (metric) { return metric.name === 'remote-media-fallback'; });
+				images.set(url.href, { url: url.href, source: remote ? 'remote' : 'local' });
+			});
+			const rows = Array.from(images.values());
+			const remote = rows.filter(function (image) { return image.source === 'remote'; }).length;
+			console.info('[Remote Media Fallback] ' + (rows.length - remote) + ' local, ' + remote + ' remote');
+			console.table(rows);
+			return rows;
+		};
+		window.addEventListener('load', function () { window.remoteMediaFallbackReport(); }, { once: true });
+		</script>
+		<?php
 	}
 
 	/**
@@ -204,3 +236,4 @@ final class Remote_Media_Fallback {
 }
 
 add_action( 'template_redirect', array( 'Remote_Media_Fallback', 'maybe_serve_remote_upload' ), 0 );
+add_action( 'wp_footer', array( 'Remote_Media_Fallback', 'print_console_reporter' ), PHP_INT_MAX );

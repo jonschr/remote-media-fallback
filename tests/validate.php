@@ -18,6 +18,6 @@ expect_same( null, Remote_Media_Fallback::relative_upload_path( '/wp-content/upl
 expect_same( null, Remote_Media_Fallback::relative_upload_path( '/not-uploads/photo.jpg', '/wp-content/uploads' ) );
 expect_same( true, Remote_Media_Fallback::is_allowed_content_type( 'image/webp' ) );
 expect_same( false, Remote_Media_Fallback::is_allowed_content_type( 'text/html' ) );
-expect_same( 'WordPress-Remote-Media-Fallback/0.1.2 (+https://example.com/)', Remote_Media_Fallback::user_agent( 'https://example.com' ) );
+expect_same( 'WordPress-Remote-Media-Fallback/0.1.3 (+https://example.com/)', Remote_Media_Fallback::user_agent( 'https://example.com' ) );
 
 echo "All checks passed.\n";
