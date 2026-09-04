@@ -46,5 +46,5 @@ Publish `remote-media-fallback.php` and its SHA-256 checksum as release assets.
 The installation skill can compare the plugin version, verify the checksum,
 and replace the file atomically even when WordPress is stopped.
 
-Pushing a version tag such as `v0.1.0` creates those release assets
+Pushing a version tag such as `v1.2.3` creates those release assets
 automatically. Keep the tag and the plugin's `Version` header in sync.

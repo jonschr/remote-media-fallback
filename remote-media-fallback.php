@@ -3,7 +3,7 @@
  * Plugin Name: Remote Media Fallback
  * Plugin URI: https://github.com/jonschr/remote-media-fallback
  * Description: Serves missing local uploads from a configured production WordPress site.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Requires PHP: 7.4
  * Author: Jon Schroeder
  * Update URI: https://github.com/jonschr/remote-media-fallback
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class Remote_Media_Fallback {
 
-	const VERSION = '0.1.0';
+	const VERSION = '0.1.1';
 	const URL_CONSTANT = 'REMOTE_MEDIA_FALLBACK_URL';
 
 	/**
@@ -59,7 +59,7 @@ final class Remote_Media_Fallback {
 
 		$temp_file = '';
 		if ( 'GET' === $method ) {
-			$temp_file = wp_tempnam( basename( $relative ) );
+			$temp_file = tempnam( get_temp_dir(), 'remote-media-fallback-' );
 			if ( ! $temp_file ) {
 				return;
 			}
