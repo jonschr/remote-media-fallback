@@ -1,10 +1,12 @@
 <?php
 /**
  * Plugin Name: Remote Media Fallback
+ * Plugin URI: https://github.com/jonschr/remote-media-fallback
  * Description: Serves missing local uploads from a configured production WordPress site.
  * Version: 0.1.0
  * Requires PHP: 7.4
  * Author: Jon Schroeder
+ * Update URI: https://github.com/jonschr/remote-media-fallback
  */
 
 defined( 'ABSPATH' ) || exit;
